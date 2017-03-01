@@ -22,18 +22,46 @@ class SimpleEnvironment(object):
 
     def GetSuccessors(self, node_id):
 
-        successors = []
+        successors = [0]*4
 
         # TODO: Here you will implement a function that looks
         #  up the configuration associated with the particular node_id
         #  and return a list of node_ids that represent the neighboring
         #  nodes
-        
+        config = self.discrete_env.NodeIdToConfiguration(node_id)
+        print config
+        idx = 0
+        if config[0] + self.discrete_env.resolution < self.upper_limits[0]:
+            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0] + self.discrete_env.resolution, config[1]]) 
+        else:
+            successors[idx] = -1
+        idx = idx + 1
+
+        if config[1] + self.discrete_env.resolution < self.upper_limits[1]:
+            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0], config[1] + self.discrete_env.resolution])
+        else:
+            successors[idx] = -1
+        idx = idx + 1
+
+        if config[0] - self.discrete_env.resolution > self.lower_limits[0]:
+            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0] - self.discrete_env.resolution, config[1]]) 
+        else:
+            successors[idx] = -1
+        idx = idx + 1
+
+        if config[1] - self.discrete_env.resolution > self.lower_limits[1]:
+            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0], config[1] - self.discrete_env.resolution])
+        else:
+            successors[idx] = -1
+        idx = idx + 1
+
+
+
         return successors
 
     def ComputeDistance(self, start_id, end_id):
 
-        dist = 0
+        dist = numpy.linalg.norm(numpy.array(self.discrete_env.NodeIdToConfiguration(start_id)) - numpy.array(self.discrete_env.NodeIdToConfiguration(end_id)))
 
         # TODO: Here you will implement a function that 
         # computes the distance between the configurations given
@@ -43,7 +71,7 @@ class SimpleEnvironment(object):
 
     def ComputeHeuristicCost(self, start_id, goal_id):
         
-        cost = 0
+        cost = self.ComputeDistance(start_id,goal_id)
 
         # TODO: Here you will implement a function that 
         # computes the heuristic cost between the configurations
