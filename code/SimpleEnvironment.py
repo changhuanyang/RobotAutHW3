@@ -22,7 +22,7 @@ class SimpleEnvironment(object):
 
     def GetSuccessors(self, node_id):
 
-        successors = [0]*4
+        successors = []
 
         # TODO: Here you will implement a function that looks
         #  up the configuration associated with the particular node_id
@@ -32,30 +32,19 @@ class SimpleEnvironment(object):
         print config
         idx = 0
         if config[0] + self.discrete_env.resolution < self.upper_limits[0]:
-            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0] + self.discrete_env.resolution, config[1]]) 
-        else:
-            successors[idx] = -1
-        idx = idx + 1
+            successors.append(self.discrete_env.ConfigurationToNodeId([config[0] + self.discrete_env.resolution, config[1]])); 
+        
 
         if config[1] + self.discrete_env.resolution < self.upper_limits[1]:
-            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0], config[1] + self.discrete_env.resolution])
-        else:
-            successors[idx] = -1
-        idx = idx + 1
+            successors.append(self.discrete_env.ConfigurationToNodeId([config[0], config[1] + self.discrete_env.resolution]));
+
 
         if config[0] - self.discrete_env.resolution > self.lower_limits[0]:
-            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0] - self.discrete_env.resolution, config[1]]) 
-        else:
-            successors[idx] = -1
-        idx = idx + 1
+            successors.append(self.discrete_env.ConfigurationToNodeId([config[0] - self.discrete_env.resolution, config[1]])); 
+
 
         if config[1] - self.discrete_env.resolution > self.lower_limits[1]:
-            successors[idx] = self.discrete_env.ConfigurationToNodeId([config[0], config[1] - self.discrete_env.resolution])
-        else:
-            successors[idx] = -1
-        idx = idx + 1
-
-
+            successors.append(self.discrete_env.ConfigurationToNodeId([config[0], config[1] - self.discrete_env.resolution]));
 
         return successors
 
