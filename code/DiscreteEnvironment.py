@@ -48,7 +48,9 @@ class DiscreteEnvironment(object):
         #
         coord = [0] * self.dimension
         for idx in range(self.dimension):
-            coord[idx] = numpy.ceil((config[idx]-self.lower_limits[idx])/self.resolution)
+            #Peter:
+            #the coord should start from 0 to coord_cells[idx] -1 , right?
+            coord[idx] = numpy.floor((config[idx]-self.lower_limits[idx])/self.resolution)
         return coord
 
     def GridCoordToConfiguration(self, coord):
@@ -59,7 +61,10 @@ class DiscreteEnvironment(object):
         #
         config = [0] * self.dimension
         for idx in range(self.dimension):
-            config[idx] = coord[idx]*self.resolution + self.lower_limits[idx]
+            #Peter
+            #                                                should shift to the center of the grid
+            config[idx] = self.lower_limits[idx] + coord[idx]* self.resolution + self.resolution/2
+            assert(coord[idx] < self.num_cells[idx])
         return config
 
     def GridCoordToNodeId(self,coord):
@@ -87,12 +92,16 @@ class DiscreteEnvironment(object):
         for i in range(1,self.dimension):
             dim = dim*self.num_cells[i]
             
-
-
         coord = [0] * self.dimension
         index = node_id
         denom_dim = dim
         numer_dim = dim
+
+        #Peter doulble check
+        #index2 = node_id
+        #dim2 = dim
+        #coord2 = [0]*self.dimension
+
         for idx in range(self.dimension):
             index = node_id
             numer_dim = dim
@@ -109,7 +118,14 @@ class DiscreteEnvironment(object):
                 denom_dim = denom_dim / self.num_cells[idx+1]
             else:
                 denom_dim = 1
-
+            #Peter, just for double check
+            #coord2[idx] = numpy.floor(index2 / dim2)
+            #index2 = index2 - coord2[idx]*dim2
+            #if(idx < (self.dimension -1)): 
+            #    dim2 = dim2 / self.num_cells[idx+1]
+            #else:
+            #    dim2 = 1
+            #assert(coord2[idx] == coord[idx])
         # c = coord
         return coord
         

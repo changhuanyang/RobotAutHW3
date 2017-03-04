@@ -29,10 +29,8 @@ class SimpleEnvironment(object):
         #  and return a list of node_ids that represent the neighboring
         #  nodes
         config = self.discrete_env.NodeIdToConfiguration(node_id)
-        print config
+        #print config
         idx = 0
-        if config[0] + self.discrete_env.resolution < self.upper_limits[0]:
-            successors.append(self.discrete_env.ConfigurationToNodeId([config[0] + self.discrete_env.resolution, config[1]])); 
         
 
         if config[1] + self.discrete_env.resolution < self.upper_limits[1]:
@@ -46,6 +44,9 @@ class SimpleEnvironment(object):
         if config[1] - self.discrete_env.resolution > self.lower_limits[1]:
             successors.append(self.discrete_env.ConfigurationToNodeId([config[0], config[1] - self.discrete_env.resolution]));
 
+        if config[0] + self.discrete_env.resolution < self.upper_limits[0]:
+            successors.append(self.discrete_env.ConfigurationToNodeId([config[0] + self.discrete_env.resolution, config[1]])); 
+        
         return successors
 
     def ComputeDistance(self, start_id, end_id):
@@ -99,5 +100,22 @@ class SimpleEnvironment(object):
                 [sconfig[1], econfig[1]],
                 'k.-', linewidth=2.5)
         pl.draw()
-
+    #help function for checking collision
+    def is_collision(self, n_config):
+        position = self.robot.GetTransform();
         
+        #change the current position valuse wiht n_config
+        position[0][3] = n_config[0]
+        position[1][3] = n_config[1]
+        #move robot to new position
+        self.robot.SetTransform(position)
+        
+        return self.robot.GetEnv().CheckCollision(self.robot) 
+    #help function
+    def ComputePathLength(self, path):
+        length = 0
+
+        for milestone in range(1,len(path)):
+            dist =  numpy.linalg.norm(numpy.array(path[milestone-1])-numpy.array(path[milestone]))
+            length += dist
+        return length
