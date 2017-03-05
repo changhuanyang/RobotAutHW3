@@ -10,6 +10,7 @@ class DepthFirstPlanner(object):
     def Plan(self, start_config, goal_config):
         
         plan = []
+        original_pos = self.planning_env.robot.GetTransform()
         
         # TODO: Here you will implement the depth first planner
         #  The return path should be a numpy array
@@ -44,7 +45,7 @@ class DepthFirstPlanner(object):
                 #visualize
                 if(self.visualize):
                     pop_config = self.planning_env.discrete_env.NodeIdToConfiguration(pop_id)
-                    self.planning_env.PlotEdge(pop_config,goal_config)
+                    # self.planning_env.PlotEdge(pop_config,goal_config)
                 find_path = True
                 break 
             neighbors = self.planning_env.GetSuccessors(pop_id);
@@ -64,10 +65,11 @@ class DepthFirstPlanner(object):
                     #for visulization
                     if(self.visualize):
                         pop_config = self.planning_env.discrete_env.NodeIdToConfiguration(pop_id)
-                        self.planning_env.PlotEdge(pop_config,n_config)
+                        # self.planning_env.PlotEdge(pop_config,n_config)
                         #print n_config
         
         #find a path
+        self.planning_env.robot.SetTransform(original_pos)
         if(find_path):
             current_id = goal_id
             #recursively search from goal to start

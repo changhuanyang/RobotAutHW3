@@ -60,7 +60,12 @@ class AStarPlanner(object):
         if path_found :
             print "Path found"
             while(trajectory[current_id] != start):
-                plan.append(self.planning_env.discrete_env.NodeIdToConfiguration(current_id))
+                if current_id == end :
+                    plan.append(self.planning_env.discrete_env.NodeIdToConfiguration(end))
+                else:
+                    plan.append(self.planning_env.discrete_env.NodeIdToConfiguration(current_id))    
+                
+                self.planning_env.PlotEdge(self.planning_env.discrete_env.NodeIdToConfiguration(current_id),self.planning_env.discrete_env.NodeIdToConfiguration(trajectory[current_id]))
                 current_id = trajectory[current_id]
         else:
             print "No path found"
