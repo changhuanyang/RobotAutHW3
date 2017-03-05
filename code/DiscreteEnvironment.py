@@ -115,7 +115,7 @@ class DiscreteEnvironment(object):
             # else:
             coord[idx] = numpy.floor(index / denom_dim)
             if idx < self.dimension - 1 :
-                denom_dim = denom_dim / self.num_cells[idx+1]
+                denom_dim = denom_dim / self.num_cells[idx + 1]
             else:
                 denom_dim = 1
             #Peter, just for double check

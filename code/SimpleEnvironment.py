@@ -61,7 +61,13 @@ class SimpleEnvironment(object):
 
     def ComputeHeuristicCost(self, start_id, goal_id):
         
-        cost = self.ComputeDistance(start_id,goal_id)
+        # cost = self.ComputeDistance(start_id,goal_id)
+        start_config = self.discrete_env.NodeIdToConfiguration(start_id)
+        goal_config = self.discrete_env.NodeIdToConfiguration(goal_id)
+
+        cost = 0;
+        for i in range(self.discrete_env.dimension):
+            cost = cost + abs(start_config[i] - goal_config[i])
 
         # TODO: Here you will implement a function that 
         # computes the heuristic cost between the configurations
@@ -102,6 +108,7 @@ class SimpleEnvironment(object):
         pl.draw()
     #help function for checking collision
     def is_collision(self, n_config):
+
         position = self.robot.GetTransform();
         
         #change the current position valuse wiht n_config
@@ -109,7 +116,7 @@ class SimpleEnvironment(object):
         position[1][3] = n_config[1]
         #move robot to new position
         self.robot.SetTransform(position)
-        
+
         return self.robot.GetEnv().CheckCollision(self.robot) 
     #help function
     def ComputePathLength(self, path):
