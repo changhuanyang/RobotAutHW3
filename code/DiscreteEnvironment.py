@@ -17,10 +17,8 @@ class DiscreteEnvironment(object):
         # Figure out the number of grid cells that are in each dimension
         self.num_cells = self.dimension*[0]
         for idx in range(self.dimension):
-            self.num_cells[idx] = numpy.ceil((upper_limits[idx] - lower_limits[idx])/resolution)
-
-
-
+            self.num_cells[idx] = numpy.ceil((upper_limits[idx] - lower_limits[idx])/self.resolution)
+        #print "num_cells=",self.num_cells
     def NodeIdToConfiguration(self, nid):
         
         # TODO:
@@ -61,9 +59,11 @@ class DiscreteEnvironment(object):
         #
         config = [0] * self.dimension
         for idx in range(self.dimension):
-            #Peter
-            #                                                should shift to the center of the grid
-            config[idx] = self.lower_limits[idx] + coord[idx]* self.resolution + self.resolution/2
+            #Peter to prevent is over the upper limit
+            if  (coord[idx] >= (self.num_cells[idx]-1)):
+                config[idx] = (self.lower_limits[idx] + coord[idx]* self.resolution+self.upper_limits[idx])/2
+            else:
+                config[idx] = self.lower_limits[idx] + coord[idx]* self.resolution + self.resolution/2
             assert(coord[idx] < self.num_cells[idx])
         return config
 
@@ -115,7 +115,7 @@ class DiscreteEnvironment(object):
             # else:
             coord[idx] = numpy.floor(index / denom_dim)
             if idx < self.dimension - 1 :
-                denom_dim = denom_dim / self.num_cells[idx + 1]
+                denom_dim = denom_dim / self.num_cells[idx+1]
             else:
                 denom_dim = 1
             #Peter, just for double check
