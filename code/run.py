@@ -81,7 +81,8 @@ if __name__ == "__main__":
     else:
         print 'Unknown planner option: %s' % args.planner
         exit(0)
-
+    #import IPython
+    #IPython.embed()
     main(robot, planning_env, planner)
 
     import IPython

@@ -38,73 +38,55 @@ class HerbEnvironment(object):
         self.robot.GetEnv().GetViewer().SetCamera(camera_pose)
     
     def GetSuccessors(self, node_id):
-
         successors = []
-
-        # TODO: Here you will implement a function that looks
-        #  up the configuration associated with the particular node_id
-        #  and return a list of node_ids that represent the neighboring
-        #  nodes
-    
-        node_config = numpy.array(self.discrete_env.NodeIdToConfiguration(node_id))
         node_coord = numpy.array(self.discrete_env.NodeIdToGridCoord(node_id))
 
         #for each direction there are two type neighbor
         for idx in range(self.discrete_env.dimension):
-            #positive direction
+                #positive direction
             if( (node_coord[idx] + 1) <= (self.discrete_env.num_cells[idx]-1) ):
                 n_node_coord = numpy.copy(node_coord)
                 n_node_coord[idx] += 1
-                n_node_id = self.discrete_env.GridCoordToNodeId(n_node_coord)
-                successors.append(n_node_id)
+                n_node_config = self.discrete_env.GridCoordToConfiguration(n_node_coord)
+                if(self.no_collision(n_node_config)):
+                    n_node_id = self.discrete_env.GridCoordToNodeId(n_node_coord)
+                    successors.append(n_node_id)
             #negation direction
-            if( (node_config[idx] - 1) >= 0 ):
+            if( (node_coord[idx] - 1) >= 0 ):
                 n_node_coord = numpy.copy(node_coord)
                 n_node_coord[idx] -= 1
-                n_node_id2 = self.discrete_env.GridCoordToNodeId(n_node_coord)
-                successors.append(n_node_id2)
-
+                n_node_config = self.discrete_env.GridCoordToConfiguration(n_node_coord)
+                if(self.no_collision(n_node_config)):
+                    n_node_id = self.discrete_env.GridCoordToNodeId(n_node_coord)
+                    successors.append(n_node_id)
         return successors
 
     def ComputeDistance(self, start_id, end_id):
-
-        dist = 0
-    
-        # TODO: Here you will implement a function that 
-        # computes the distance between the configurations given
-        # by the two node ids
-       
-        #get node_id
-        start_config = self.discrete_env.NodeIdToConfiguration(start_id)
-        end_config = self.discrete_env.NodeIdToConfiguration(end_id)
+            start_config = self.discrete_env.NodeIdToConfiguration(start_id)
+            end_config = self.discrete_env.NodeIdToConfiguration(end_id)
         #calculate distance
-        dist = numpy.linalg.norm(numpy.array(start_config) - numpy.array(end_config))
-
-        return dist
-
+            dist = numpy.linalg.norm(numpy.array(start_config) - numpy.array(end_config))
+            return dist
     def ComputeHeuristicCost(self, start_id, goal_id):
-        
         cost = 0
-
         # TODO: Here you will implement a function that 
         # computes the heuristic cost between the configurations
         # given by the two node ids
-        
         cost = self.ComputeDistance(start_id,goal_id)
-
         return cost
-    def is_collision(self, n_config):
+    def no_collision(self, n_config):
+        with self.robot:
         #change the current position valuse wiht n_config
-        self.robot.SetActiveDOFValues(numpy.array(n_config))
+            self.robot.SetActiveDOFValues(numpy.array(n_config))
         #move robot to new positi
         #print "checkcollision = ",self.robot.GetEnv().CheckCollision(self.robot)
-        #print "selfcheck= ",self.robot.CheckSelfCollision()
-        return self.robot.GetEnv().CheckCollision(self.robot) or self.robot.CheckSelfCollision()
-
+        #print "selfcheck= ",self.robot.CheckSelfCollision()      i 
+            flag = self.robot.GetEnv().CheckCollision(self.robot) or self.robot.CheckSelfCollision()
+            flag = not flag
+        return flag
     def ComputePathLength(self, path):
-        length = 0
+        path_length = 0
         for milestone in range(1,len(path)):
             dist =  numpy.linalg.norm(numpy.array(path[milestone-1])-numpy.array(path[milestone]))
-            length += dist
-        
-        return length
+            path_length = path_length + dist
+        return path_length

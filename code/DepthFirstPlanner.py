@@ -36,7 +36,7 @@ class DepthFirstPlanner(object):
         find_path = False
         total_vertices += 1
         
-        while(pio_q.count != 0):
+        while(len(pio_q)):
             #raw_input("push any key to continue")
             #print "pio_q = ", pio_q
             pop_id = pio_q.pop();# for BFS change to popleft()
@@ -45,7 +45,7 @@ class DepthFirstPlanner(object):
                 #visualize
                 if(self.visualize):
                     pop_config = self.planning_env.discrete_env.NodeIdToConfiguration(pop_id)
-                    # self.planning_env.PlotEdge(pop_config,goal_config)
+                    self.planning_env.PlotEdge(pop_config,goal_config)
                 find_path = True
                 break 
             neighbors = self.planning_env.GetSuccessors(pop_id);
@@ -53,19 +53,17 @@ class DepthFirstPlanner(object):
             for n_id in neighbors:
                 #create 
                 n_config = self.planning_env.discrete_env.NodeIdToConfiguration(n_id)
-                
                 #check no visited before        and  can acheive this neighbor(no collision)
-                if( (n_id in self.nodes) == False  and self.planning_env.is_collision(n_config) == False):
+                if( (n_id in self.nodes) == False):
                     #insert in priority queue and mark as visisted
                     pio_q.append(n_id)
                     #mark as visited and point to parent id
                     self.nodes[n_id] = pop_id
                     total_vertices += 1
-                    
                     #for visulization
                     if(self.visualize):
                         pop_config = self.planning_env.discrete_env.NodeIdToConfiguration(pop_id)
-                        # self.planning_env.PlotEdge(pop_config,n_config)
+                        self.planning_env.PlotEdge(pop_config,n_config)
                         #print n_config
         
         #find a path

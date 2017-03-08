@@ -23,30 +23,29 @@ class SimpleEnvironment(object):
     def GetSuccessors(self, node_id):
 
         successors = []
-
         # TODO: Here you will implement a function that looks
         #  up the configuration associated with the particular node_id
         #  and return a list of node_ids that represent the neighboring
         #  nodes
-        config = self.discrete_env.NodeIdToConfiguration(node_id)
+        coord = numpy.array(self.discrete_env.NodeIdToGridCoord(node_id))
         #print config
         idx = 0
-        
-
-        if config[1] + self.discrete_env.resolution < self.upper_limits[1]:
-            successors.append(self.discrete_env.ConfigurationToNodeId([config[0], config[1] + self.discrete_env.resolution]));
-
-
-        if config[0] - self.discrete_env.resolution > self.lower_limits[0]:
-            successors.append(self.discrete_env.ConfigurationToNodeId([config[0] - self.discrete_env.resolution, config[1]])); 
-
-
-        if config[1] - self.discrete_env.resolution > self.lower_limits[1]:
-            successors.append(self.discrete_env.ConfigurationToNodeId([config[0], config[1] - self.discrete_env.resolution]));
-
-        if config[0] + self.discrete_env.resolution < self.upper_limits[0]:
-            successors.append(self.discrete_env.ConfigurationToNodeId([config[0] + self.discrete_env.resolution, config[1]])); 
-        
+        for i in range(len(coord)):
+            if coord[i] + 1 < self.discrete_env.num_cells[i]:
+                this_coord = numpy.copy(coord)
+                this_coord[i] += 1
+                this_id = self.discrete_env.GridCoordToNodeId(this_coord)
+                this_config = self.discrete_env.NodeIdToConfiguration(this_id)
+                if self.no_collision(this_config):
+                    successors.append(this_id)
+            if (coord[i] - 1) >= 0 :
+                this_coord = numpy.copy(coord)
+                this_coord[i] -= 1
+                this_id = self.discrete_env.GridCoordToNodeId(this_coord)
+                this_config = self.discrete_env.NodeIdToConfiguration(this_id)
+                if self.no_collision(this_config):
+                    successors.append(this_id)
+        #print "number of successors = ",len(successors)
         return successors
 
     def ComputeDistance(self, start_id, end_id):
@@ -55,8 +54,7 @@ class SimpleEnvironment(object):
 
         # TODO: Here you will implement a function that 
         # computes the distance between the configurations given
-        # by the two node ids
-
+        # by te two node ids
         return dist
 
     def ComputeHeuristicCost(self, start_id, goal_id):
@@ -107,17 +105,18 @@ class SimpleEnvironment(object):
                 'k.-', linewidth=2.5)
         pl.draw()
     #help function for checking collision
-    def is_collision(self, n_config):
-
-        position = self.robot.GetTransform();
+    def no_collision(self, n_config):
+        with self.robot:
+            position = self.robot.GetTransform();
         
-        #change the current position valuse wiht n_config
-        position[0][3] = n_config[0]
-        position[1][3] = n_config[1]
-        #move robot to new position
-        self.robot.SetTransform(position)
-
-        return self.robot.GetEnv().CheckCollision(self.robot) 
+            #change the current position valuse wiht n_config
+            position[0][3] = n_config[0]
+            position[1][3] = n_config[1]
+            #move robot to new position
+            self.robot.SetTransform(position)
+            flag = self.robot.GetEnv().CheckCollision(self.robot)
+            flag = not flag
+        return flag 
     #help function
     def ComputePathLength(self, path):
         length = 0
