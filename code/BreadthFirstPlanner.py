@@ -6,7 +6,7 @@ class BreadthFirstPlanner(object):
         self.planning_env = planning_env
         self.visualize = visualize
         self.nodes = dict()
-        
+
     def Plan(self, start_config, goal_config):
         
         plan = []
@@ -37,15 +37,15 @@ class BreadthFirstPlanner(object):
         
         while(len(pio_q)):
             #raw_input("push any key to continue")
-            #print "pio_q = ", pio_q
+            #print "pio_q = ",pio_q
             #pop_id = pio_q.pop();# for BFS change to popleft()
             pop_id = pio_q.popleft();
             #print "popout = ", pop_id
             if(pop_id == goal_id):
                 #visualize
                 if(self.visualize):
-                    pop_config = self.planning_env.discrete_env.NodeIdToConfiguration(pop_id)
-                    # self.planning_env.PlotEdge(pop_config,goal_config)
+                        n_node_config = self.planning_env.discrete_env.NodeIdToConfiguration(neighbour)
+                        self.planning_env.PlotEdge(current_node_config,n_node_config)
                 find_path = True
                 break 
             #GetSuccessor has took care of collision 
@@ -64,7 +64,7 @@ class BreadthFirstPlanner(object):
                     #for visulization
                     if(self.visualize):
                         pop_config = self.planning_env.discrete_env.NodeIdToConfiguration(pop_id)
-                        # self.planning_env.PlotEdge(pop_config,n_config)
+                        self.planning_env.PlotEdge(pop_config,n_config)
                         #print n_config
         
         #find a path

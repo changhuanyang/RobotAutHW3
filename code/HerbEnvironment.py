@@ -62,11 +62,19 @@ class HerbEnvironment(object):
         return successors
 
     def ComputeDistance(self, start_id, end_id):
-            start_config = self.discrete_env.NodeIdToConfiguration(start_id)
-            end_config = self.discrete_env.NodeIdToConfiguration(end_id)
+        start_config = self.discrete_env.NodeIdToConfiguration(start_id)
+        end_config = self.discrete_env.NodeIdToConfiguration(end_id)
         #calculate distance
-            dist = numpy.linalg.norm(numpy.array(start_config) - numpy.array(end_config))
-            return dist
+        dist = numpy.linalg.norm(numpy.array(start_config) - numpy.array(end_config))
+        return dist
+    def ComputeDistance_continue(self, start_id, end_id):
+        dist = numpy.linalg.norm(numpy.array(start_id) - numpy.array(end_id))
+
+        # TODO: Here you will implement a function that 
+        # computes the distance between the configurations given
+        # by te two node ids
+        return dist
+
     def ComputeHeuristicCost(self, start_id, goal_id):
         cost = 0
         # TODO: Here you will implement a function that 
@@ -90,3 +98,69 @@ class HerbEnvironment(object):
             dist =  numpy.linalg.norm(numpy.array(path[milestone-1])-numpy.array(path[milestone]))
             path_length = path_length + dist
         return path_length
+
+    def GenerateRandomConfiguration(self):
+        config = [0] * len(self.robot.GetActiveDOFIndices())
+
+        #
+        # TODO: Generate and return a random configuration
+        #
+    # Brad: Generate and return a random, collision-free, configuration
+        lower_limits, upper_limits = self.robot.GetActiveDOFLimits()
+        collisionFlag = True
+        while collisionFlag is True:
+            for dof in range(len(self.robot.GetActiveDOFIndices())):
+                config[dof] = lower_limits[dof] + (upper_limits[dof] - lower_limits[dof]) * numpy.random.random_sample()
+                self.robot.SetActiveDOFValues(numpy.array(config))
+            if(self.robot.GetEnv().CheckCollision(self.robot)) is False:
+                if(self.robot.CheckSelfCollision()) is False:
+                    collisionFlag = False
+            #else:
+                #print "Self Collision detected in random configuration"
+        #else:
+            #print "Collision Detected in random configuration" 
+        return numpy.array(config)
+    def Extend(self, start_config, end_config):
+        
+        #
+        # TODO: Implement a function which attempts to extend from 
+        #   a start configuration to a goal configuration
+        #
+    # Brad: Extend from start to end configuration and return sooner if collision or limits exceeded
+        lower_limits, upper_limits = self.robot.GetActiveDOFLimits()
+        resolution = 100
+    
+    #Calculate incremental configuration changes
+        config_inc = [0] * len(self.robot.GetActiveDOFIndices())
+        for dof in range(len(self.robot.GetActiveDOFIndices())):
+            config_inc[dof] = (end_config[dof] - start_config[dof]) / float(resolution)
+
+    #Set initial config state to None to return if start_config violates conditions
+        config = None
+ 
+    #Move from start_config to end_config
+        for step in range(resolution+1):
+            prev_config = config
+            config = [0] * len(self.robot.GetActiveDOFIndices())
+            for dof in range(len(self.robot.GetActiveDOFIndices())):
+            #Calculate new config
+                config[dof] = start_config[dof] + config_inc[dof]*float(step)
+
+            #Check joint limits
+                if config[dof] > upper_limits[dof]:
+                    print "Upper joint limit exceeded"
+                    return prev_config
+                if config[dof] < lower_limits[dof]:
+                    print "Lower joint limit exceeded"
+                    return prev_config
+
+        #Set config and check for collision
+        #CHECK: Lock environment?
+            self.robot.SetActiveDOFValues(numpy.array(config))
+            if(self.robot.GetEnv().CheckCollision(self.robot)) is True:
+            #print "Collision Detected in extend"
+                return prev_config
+            if(self.robot.CheckSelfCollision()) is True:
+            #print "Self Collision Detected in extend"
+                return prev_config
+        return end_config
